@@ -9,6 +9,7 @@ TODO!: Find a rendering library that I like...
 
 Refrence Material
 =========
+http://learningwgl.com
 
 Coding and formulas
 ---------
@@ -16,5 +17,6 @@ http://www.redblobgames.com/grids/hexagons/ - Quick guide to rendering/working w
 
 Built using
 -----------
-Haxe: http://haxe.org/doc
 Sublime Text 3: http://www.sublimetext.com/3
+https://github.com/toji/gl-matrix
+
