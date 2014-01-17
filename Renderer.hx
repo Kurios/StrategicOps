@@ -19,12 +19,17 @@ var height:Int;
 var width:Int;
 var matx4:Dynamic;
 
+var targets:Array<Renderable>;
+
 public function new(canvas:js.html.Element) {
     matx4 = untyped __js__('mat4');
    	mvMatrix = matx4.create();
     pMatrix = matx4.create();
     initGL(cast(canvas,js.html.CanvasElement));
    	initShaders();
+    targets = new Array();
+    targets.push(new Hex());
+    targets.push(new Hex());
    	initBuffers();
 
 	gl.clearColor(0.2, 0.2, 0.2, 1.0);
@@ -38,64 +43,12 @@ public function draw()
 
 
 
-var triangle:Dynamic;
-var square:Dynamic;
-
 function initBuffers() {
-    triangle = [];
-    square = [];
-    triangle.VertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(GL.ARRAY_BUFFER, triangle.VertexPositionBuffer);
-    var y  = 0.5 * Math.sqrt(3);
-    var vertices = [
-         0.0,  1.0,  0.0,
-        -1.0, -1.0,  0.0,
-         1.0, -1.0,  0.0
-    ];
-
-    gl.bufferData(GL.ARRAY_BUFFER, new js.html.Float32Array(vertices), GL.STATIC_DRAW);
-    
-    triangle.VertexColorBuffer = gl.createBuffer();
-    gl.bindBuffer(GL.ARRAY_BUFFER, triangle.VertexColorBuffer);
-    var colors = [
-    	 0.0, 0.0, 1.0, 1.0,
-    	 0.0, 0.0, 0.5, 1.0,
-    	 0.0, 0.0, 0.0, 1.0
-    ];
-
-	gl.bufferData(GL.ARRAY_BUFFER, new js.html.Float32Array(colors), GL.STATIC_DRAW);
-    
-    triangle.VertexPositionBuffer.itemSize = 3;
-    triangle.VertexPositionBuffer.numItems = 3;
-    triangle.VertexColorBuffer.itemSize = 4;
-
-    square.VertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(GL.ARRAY_BUFFER, square.VertexPositionBuffer);
-    vertices = [
-        0.0, -1.0,  0.0,
-        y,  -0.5,  0.0,
-        -1*y, -0.5,  0.0,
-		y, 0.5,  0.0,
-		-1*y,  0.5,  0.0,
-         0.0,  1.0,  0.0
-    ];
-    gl.bufferData(GL.ARRAY_BUFFER, new js.html.Float32Array(vertices), GL.STATIC_DRAW);
-
-    square.VertexColorBuffer = gl.createBuffer();
-    gl.bindBuffer(GL.ARRAY_BUFFER,square.VertexColorBuffer);
-    colors = [
-    	0.0, 0.0, 1.0,	1.0,
-    	0.0, 0.0, 0.85,	1.0,
-    	0.0, 0.0, 0.7,	1.0,
-    	0.0, 0.0, 0.55, 1.0,
-    	0.0, 0.0, 0.40, 1.0,
-    	0.0, 0.0, 0.25,	1.0
-    	];
-
-    gl.bufferData(GL.ARRAY_BUFFER, new js.html.Float32Array(colors), GL.STATIC_DRAW);
-    square.VertexPositionBuffer.itemSize = 3;
-    square.VertexPositionBuffer.numItems = 6;
-    square.VertexColorBuffer.itemSize = 4;
+  for( item in targets )
+  {
+    item.bindBuffers(gl);
+  }
+  //Hex.bindBuffers(gl);
 };
 
 function drawScene() {
@@ -105,22 +58,15 @@ function drawScene() {
     matx4.perspective(pMatrix, .7854, width / height, 0.1, 100.0);
     
     matx4.identity(mvMatrix);
-    matx4.translate(mvMatrix, mvMatrix, [-1.5, 0.0, -7.0]);
-    gl.bindBuffer(GL.ARRAY_BUFFER, triangle.VertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangle.VertexPositionBuffer.itemSize, GL.FLOAT, true, 0, 0);
-    setMatrixUniforms();
-    gl.bindBuffer(GL.ARRAY_BUFFER, triangle.VertexColorBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, triangle.VertexColorBuffer.itemSize, GL.FLOAT, true, 0,0);
-    gl.drawArrays(GL.TRIANGLES, 0, triangle.VertexPositionBuffer.numItems);
+    matx4.translate(mvMatrix, mvMatrix, [-4.5, 0.0, -7.0]);
 
-    
-    matx4.translate(mvMatrix, mvMatrix, [3.0, 0.0, 0.0]);
-    gl.bindBuffer(GL.ARRAY_BUFFER, square.VertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, square.VertexPositionBuffer.itemSize, GL.FLOAT, true, 0, 0);
-    setMatrixUniforms();
-    gl.bindBuffer(GL.ARRAY_BUFFER, square.VertexColorBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, square.VertexColorBuffer.itemSize, GL.FLOAT, true, 0,0);
-    gl.drawArrays(GL.TRIANGLE_STRIP, 0, square.VertexPositionBuffer.numItems);
+    for( item in targets )
+    {
+      matx4.translate(mvMatrix, mvMatrix, [3.0, 0.0, 0.0]);
+      shaderProgram.mvMatrix = mvMatrix;
+      shaderProgram.pMatrix = pMatrix;
+      item.draw(gl,shaderProgram);
+    }
 };
 
 function initGL(canvas:js.html.CanvasElement) {

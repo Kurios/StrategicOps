@@ -10,6 +10,49 @@ GLProgram.__super__ = WebGLProgram;
 GLProgram.prototype = $extend(WebGLProgram.prototype,{
 	__class__: GLProgram
 });
+var Renderable = function() { }
+Renderable.__name__ = true;
+Renderable.prototype = {
+	setMatrixUniforms: function(gl,program) {
+		gl.uniformMatrix4fv(program.pMatrixUniform,false,program.pMatrix);
+		gl.uniformMatrix4fv(program.mvMatrixUniform,false,program.mvMatrix);
+	}
+	,draw: function(gl,program) {
+	}
+	,bindBuffers: function(context) {
+	}
+	,__class__: Renderable
+}
+var Hex = function() {
+	this.GL = WebGLRenderingContext;
+};
+Hex.__name__ = true;
+Hex.__super__ = Renderable;
+Hex.prototype = $extend(Renderable.prototype,{
+	draw: function(gl,program) {
+		gl.bindBuffer(34962,this.VertexPositionBuffer);
+		gl.vertexAttribPointer(program.vertexPositionAttribute,this.VertexPositionBuffer.itemSize,5126,true,0,0);
+		gl.bindBuffer(34962,this.VertexColorBuffer);
+		gl.vertexAttribPointer(program.vertexColorAttribute,this.VertexColorBuffer.itemSize,5126,true,0,0);
+		this.setMatrixUniforms(gl,program);
+		gl.drawArrays(5,0,this.VertexPositionBuffer.numItems);
+	}
+	,bindBuffers: function(gl) {
+		this.VertexPositionBuffer = gl.createBuffer();
+		gl.bindBuffer(34962,this.VertexPositionBuffer);
+		var y = 0.5 * Math.sqrt(3);
+		var vertices = [0.0,-1.0,0.0,y,-0.5,0.0,-1 * y,-0.5,0.0,y,0.5,0.0,-1 * y,0.5,0.0,0.0,1.0,0.0];
+		gl.bufferData(34962,new Float32Array(vertices),35044);
+		this.VertexColorBuffer = gl.createBuffer();
+		gl.bindBuffer(34962,this.VertexColorBuffer);
+		var colors = [0.0,0.0,1.0,1.0,0.0,0.0,0.85,1.0,0.0,0.0,0.7,1.0,0.0,0.0,0.55,1.0,0.0,0.0,0.40,1.0,0.0,0.0,0.25,1.0];
+		gl.bufferData(34962,new Float32Array(colors),35044);
+		this.VertexPositionBuffer.itemSize = 3;
+		this.VertexPositionBuffer.numItems = 6;
+		this.VertexColorBuffer.itemSize = 4;
+	}
+	,__class__: Hex
+});
 var Main = function() { }
 Main.__name__ = true;
 Main.main = function() {
@@ -26,6 +69,9 @@ var Renderer = function(canvas) {
 	this.pMatrix = this.matx4.create();
 	this.initGL(js.Boot.__cast(canvas , HTMLCanvasElement));
 	this.initShaders();
+	this.targets = new Array();
+	this.targets.push(new Hex());
+	this.targets.push(new Hex());
 	this.initBuffers();
 	this.gl.clearColor(0.2,0.2,0.2,1.0);
 	this.gl.enable(2929);
@@ -79,47 +125,24 @@ Renderer.prototype = {
 		this.gl.clear(16640);
 		this.matx4.perspective(this.pMatrix,.7854,this.width / this.height,0.1,100.0);
 		this.matx4.identity(this.mvMatrix);
-		this.matx4.translate(this.mvMatrix,this.mvMatrix,[-1.5,0.0,-7.0]);
-		this.gl.bindBuffer(34962,this.triangle.VertexPositionBuffer);
-		this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute,this.triangle.VertexPositionBuffer.itemSize,5126,true,0,0);
-		this.setMatrixUniforms();
-		this.gl.bindBuffer(34962,this.triangle.VertexColorBuffer);
-		this.gl.vertexAttribPointer(this.shaderProgram.vertexColorAttribute,this.triangle.VertexColorBuffer.itemSize,5126,true,0,0);
-		this.gl.drawArrays(4,0,this.triangle.VertexPositionBuffer.numItems);
-		this.matx4.translate(this.mvMatrix,this.mvMatrix,[3.0,0.0,0.0]);
-		this.gl.bindBuffer(34962,this.square.VertexPositionBuffer);
-		this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute,this.square.VertexPositionBuffer.itemSize,5126,true,0,0);
-		this.setMatrixUniforms();
-		this.gl.bindBuffer(34962,this.square.VertexColorBuffer);
-		this.gl.vertexAttribPointer(this.shaderProgram.vertexColorAttribute,this.square.VertexColorBuffer.itemSize,5126,true,0,0);
-		this.gl.drawArrays(5,0,this.square.VertexPositionBuffer.numItems);
+		this.matx4.translate(this.mvMatrix,this.mvMatrix,[-4.5,0.0,-7.0]);
+		var _g = 0, _g1 = this.targets;
+		while(_g < _g1.length) {
+			var item = _g1[_g];
+			++_g;
+			this.matx4.translate(this.mvMatrix,this.mvMatrix,[3.0,0.0,0.0]);
+			this.shaderProgram.mvMatrix = this.mvMatrix;
+			this.shaderProgram.pMatrix = this.pMatrix;
+			item.draw(this.gl,this.shaderProgram);
+		}
 	}
 	,initBuffers: function() {
-		this.triangle = [];
-		this.square = [];
-		this.triangle.VertexPositionBuffer = this.gl.createBuffer();
-		this.gl.bindBuffer(34962,this.triangle.VertexPositionBuffer);
-		var y = 0.5 * Math.sqrt(3);
-		var vertices = [0.0,1.0,0.0,-1.0,-1.0,0.0,1.0,-1.0,0.0];
-		this.gl.bufferData(34962,new Float32Array(vertices),35044);
-		this.triangle.VertexColorBuffer = this.gl.createBuffer();
-		this.gl.bindBuffer(34962,this.triangle.VertexColorBuffer);
-		var colors = [0.0,0.0,1.0,1.0,0.0,0.0,0.5,1.0,0.0,0.0,0.0,1.0];
-		this.gl.bufferData(34962,new Float32Array(colors),35044);
-		this.triangle.VertexPositionBuffer.itemSize = 3;
-		this.triangle.VertexPositionBuffer.numItems = 3;
-		this.triangle.VertexColorBuffer.itemSize = 4;
-		this.square.VertexPositionBuffer = this.gl.createBuffer();
-		this.gl.bindBuffer(34962,this.square.VertexPositionBuffer);
-		vertices = [0.0,-1.0,0.0,y,-0.5,0.0,-1 * y,-0.5,0.0,y,0.5,0.0,-1 * y,0.5,0.0,0.0,1.0,0.0];
-		this.gl.bufferData(34962,new Float32Array(vertices),35044);
-		this.square.VertexColorBuffer = this.gl.createBuffer();
-		this.gl.bindBuffer(34962,this.square.VertexColorBuffer);
-		colors = [0.0,0.0,1.0,1.0,0.0,0.0,0.85,1.0,0.0,0.0,0.7,1.0,0.0,0.0,0.55,1.0,0.0,0.0,0.40,1.0,0.0,0.0,0.25,1.0];
-		this.gl.bufferData(34962,new Float32Array(colors),35044);
-		this.square.VertexPositionBuffer.itemSize = 3;
-		this.square.VertexPositionBuffer.numItems = 6;
-		this.square.VertexColorBuffer.itemSize = 4;
+		var _g = 0, _g1 = this.targets;
+		while(_g < _g1.length) {
+			var item = _g1[_g];
+			++_g;
+			item.bindBuffers(this.gl);
+		}
 	}
 	,draw: function() {
 		this.drawScene();
@@ -290,6 +313,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
+Renderable.GL = WebGLRenderingContext;
 ShaderDefs.shaderfs = "\r\nprecision mediump float;\r\n\r\nvarying vec4 vColor;\r\n\r\nvoid main(void) { \r\n   gl_FragColor = vColor;\r\n }";
 ShaderDefs.shadervs = "\r\nattribute vec3 aVertexPosition;\r\nattribute vec4 aVertexColor;\r\n\r\nuniform mat4 uMVMatrix;\r\nuniform mat4 uPMatrix;\r\n\r\nvarying vec4 vColor;\r\n\r\nvoid main(void) {\r\n    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\r\n    vColor = aVertexColor;\r\n}";
 js.Browser.window = typeof window != "undefined" ? window : null;
