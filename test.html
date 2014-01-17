@@ -2,34 +2,10 @@
 	<head>
 		<title>Strategic Operations</title>
 		<style>canvas { width: 100%; height: 100% }</style>
-		<script src="shader-fs.glsl" id="shader-fs" type="x-shader/x-fragment">
-precision mediump float;
-
-varying vec4 vColor;
-
- void main(void) {
- 
-   gl_FragColor = vColor;
- }
- </script>
-		<script src="shader-vs.glsl" id="shader-vs" type="x-shader/x-vertex">
-attribute vec3 aVertexPosition;
-attribute vec4 aVertexColor;
-
-uniform mat4 uMVMatrix;
-uniform mat4 uPMatrix;
-
-varying vec4 vColor;
-
-void main(void) {
-    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-    vColor = aVertexColor;
-}
-		</script>
 		<script src="gl-matrix.js"></script>
-		<script src="Hex.js"></script>
+		<script src="hexEngine.js"></script>
 	</head>
-	<body onload="main()" id="body" style="height: 100%; margin: 0;">
+	<body onload="Main.webGLStart()" id="body" style="height: 100%; margin: 0;">
 		<canvas id="canvas" style="border: none;">
 	</body>
 </html>
